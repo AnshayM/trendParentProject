@@ -1,5 +1,7 @@
 package pers.anshay.service;
 
+import cn.hutool.core.collection.CollectionUtil;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.Api;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -22,9 +24,23 @@ public class IndexService {
         this.restTemplate = restTemplate;
     }
 
+    @HystrixCommand(fallbackMethod = "thirdPartNotConnected")
     public List<Index> fetchIndexesFromThirdPart() {
         List<Map<String, String>> temp = restTemplate.getForObject("http://127.0.0.1:8090/indexes/codes.json", List.class);
         return map2Index(temp);
+    }
+
+    /**
+     * 断路器返回的方法
+     *
+     * @return List<Index>
+     */
+    public List<Index> thirdPartNotConnected() {
+        System.out.println("third_part_not_connected()");
+        Index index = new Index();
+        index.setCode("000000");
+        index.setName("无效指数代码");
+        return CollectionUtil.toList(index);
     }
 
 
