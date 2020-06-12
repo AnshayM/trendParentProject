@@ -3,6 +3,9 @@ package pers.anshay.service;
 import cn.hutool.core.collection.CollectionUtil;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pers.anshay.pojo.Index;
@@ -16,7 +19,9 @@ import java.util.Map;
  * @date 2020/6/11
  */
 @Api("IndexService服务类")
+@Slf4j
 @Service
+@CacheConfig(cacheNames = "indexes")
 public class IndexService {
     private final RestTemplate restTemplate;
 
@@ -25,6 +30,7 @@ public class IndexService {
     }
 
     @HystrixCommand(fallbackMethod = "thirdPartNotConnected")
+    @Cacheable(key = "'allCodes'")
     public List<Index> fetchIndexesFromThirdPart() {
         List<Map<String, String>> temp = restTemplate.getForObject("http://127.0.0.1:8090/indexes/codes.json", List.class);
         return map2Index(temp);
@@ -36,7 +42,7 @@ public class IndexService {
      * @return List<Index>
      */
     public List<Index> thirdPartNotConnected() {
-        System.out.println("third_part_not_connected()");
+        log.info("thirdPartNotConnected()");
         Index index = new Index();
         index.setCode("000000");
         index.setName("无效指数代码");
