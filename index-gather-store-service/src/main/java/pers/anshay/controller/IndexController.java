@@ -1,6 +1,7 @@
 package pers.anshay.controller;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pers.anshay.pojo.Index;
@@ -22,7 +23,22 @@ public class IndexController {
     }
 
     @GetMapping("/getCodes")
+    @ApiOperation("获取指数")
     public List<Index> get() {
-        return indexService.fetchIndexesFromThirdPart();
+        return indexService.get();
+    }
+
+    @GetMapping("/freshCodes")
+    @ApiOperation("更新指数")
+    public String fresh() {
+        indexService.fresh();
+        return "fresh codes successfully";
+    }
+
+    @GetMapping("/removeCodes")
+    @ApiOperation("移除指数")
+    public String remove() {
+        indexService.remove();
+        return "remove codes successfully";
     }
 }

@@ -1,14 +1,17 @@
 package pers.anshay.service;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import pers.anshay.pojo.Index;
+import pers.anshay.util.SpringContextUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,7 @@ import java.util.Map;
 @Service
 @CacheConfig(cacheNames = "indexes")
 public class IndexService {
+    private List<Index> indices;
     private final RestTemplate restTemplate;
 
     public IndexService(RestTemplate restTemplate) {
@@ -30,10 +34,49 @@ public class IndexService {
     }
 
     @HystrixCommand(fallbackMethod = "thirdPartNotConnected")
-    @Cacheable(key = "'allCodes'")
+    public List<Index> fresh() {
+        indices = fetchIndexesFromThirdPart();
+        IndexService indexService = SpringContextUtil.getBean(IndexService.class);
+        indexService.remove();
+        return indexService.store();
+    }
+
+    @Cacheable(key = "'all_codes'")
+    public List<Index> store() {
+        return indices;
+    }
+
+    @CacheEvict(key = "all_codes", allEntries = true)
+    public void remove() {
+    }
+
+    @Cacheable(key = "all_codes")
+    public List<Index> get() {
+        return CollUtil.toList();
+    }
+
+    @Cacheable(key = "'all_codes'")
     public List<Index> fetchIndexesFromThirdPart() {
         List<Map<String, String>> temp = restTemplate.getForObject("http://127.0.0.1:8090/indexes/codes.json", List.class);
         return map2Index(temp);
+    }
+
+    /**
+     * 处理请求结果，返回指数集合
+     *
+     * @param temp List<Map<String, String>>
+     * @return List<Index>
+     */
+    private List<Index> map2Index(List<Map<String, String>> temp) {
+        if (temp == null) {
+            return new ArrayList<>();
+        }
+        List<Index> indices = new ArrayList<>();
+        temp.forEach(item -> {
+            indices.add(new Index(item.get("code"), item.get("name")));
+        });
+        return indices;
+
     }
 
     /**
@@ -50,15 +93,4 @@ public class IndexService {
     }
 
 
-    private List<Index> map2Index(List<Map<String, String>> temp) {
-        if (temp == null) {
-            return new ArrayList<>();
-        }
-        List<Index> indices = new ArrayList<>();
-        temp.forEach(item -> {
-            indices.add(new Index(item.get("code"), item.get("name")));
-        });
-        return indices;
-
-    }
 }

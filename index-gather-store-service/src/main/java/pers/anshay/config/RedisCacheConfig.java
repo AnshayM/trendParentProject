@@ -18,6 +18,8 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 /**
+ * 设置使用redis作为缓存方案
+ *
  * @author anshay
  * @date 2020/6/13
  */
