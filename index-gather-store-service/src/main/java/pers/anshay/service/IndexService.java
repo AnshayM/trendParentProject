@@ -46,17 +46,18 @@ public class IndexService {
         return indices;
     }
 
-    @CacheEvict(key = "all_codes", allEntries = true)
+    @CacheEvict(key = "'all_codes'", allEntries = true)
     public void remove() {
     }
 
-    @Cacheable(key = "all_codes")
+    @Cacheable(key = "'all_codes'")
     public List<Index> get() {
         return CollUtil.toList();
     }
 
     @Cacheable(key = "'all_codes'")
     public List<Index> fetchIndexesFromThirdPart() {
+        //TODO 调试后创建实体类来接收
         List<Map<String, String>> temp = restTemplate.getForObject("http://127.0.0.1:8090/indexes/codes.json", List.class);
         return map2Index(temp);
     }
@@ -85,7 +86,7 @@ public class IndexService {
      * @return List<Index>
      */
     public List<Index> thirdPartNotConnected() {
-        log.info("thirdPartNotConnected()");
+        log.info("第三方数据服务未连接");
         Index index = new Index();
         index.setCode("000000");
         index.setName("无效指数代码");

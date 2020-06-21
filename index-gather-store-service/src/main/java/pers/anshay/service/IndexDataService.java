@@ -82,6 +82,7 @@ public class IndexDataService {
     }
 
     public List<IndexData> fetchIndexesFromThirdPart(String code) {
+        //TODO 调试后创建实体类来接收
         List<Map> temp = restTemplate.getForObject("http://127.0.0.1:8090/indexes/" + code + ".json", List.class);
         return map2IndexData(temp);
     }
@@ -89,7 +90,7 @@ public class IndexDataService {
     private List<IndexData> map2IndexData(List<Map> temp) {
         List<IndexData> indexDataList = new ArrayList<>();
         for (Map map : temp) {
-            String date = map.get("data").toString();
+            String date = map.get("date").toString();
             Float closePoint = Convert.toFloat(map.get("closePoint"));
             indexDataList.add(new IndexData(date, closePoint));
         }
@@ -103,7 +104,7 @@ public class IndexDataService {
      * @return List<IndexData>
      */
     public List<IndexData> thirdPartNotConnected(String code) {
-        log.info("thirdPartNotConnected()");
+        log.info("第三方数据未连接");
         IndexData index = new IndexData();
         index.setClosePoint(0);
         index.setDate("n/a");
