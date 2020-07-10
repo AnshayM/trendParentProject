@@ -13,7 +13,7 @@ import pers.anshay.job.IndexDataSyncJob;
  */
 @Configuration
 public class QuartzConfiguration {
-    private static final int INTERVAL = 60;
+    private static final int INTERVAL = 1;
 
     @Bean
     public JobDetail weatherDataSyncJobDetail() {

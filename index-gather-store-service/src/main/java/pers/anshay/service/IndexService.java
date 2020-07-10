@@ -37,7 +37,7 @@ public class IndexService {
     public List<Index> fresh() {
         indices = fetchIndexesFromThirdPart();
         IndexService indexService = SpringContextUtil.getBean(IndexService.class);
-        indexService.remove();
+        // indexService.remove();//在这里调用会引起报错，先注释，怀疑是在同一个地方调用就会引起
         return indexService.store();
     }
 
