@@ -46,7 +46,7 @@ public class IndexService {
         return indices;
     }
 
-    @CacheEvict(key = "'all_codes'", allEntries = true)
+    @CacheEvict(allEntries=true)
     public void remove() {
     }
 
@@ -87,10 +87,7 @@ public class IndexService {
      */
     public List<Index> thirdPartNotConnected() {
         log.info("第三方数据服务未连接");
-        Index index = new Index();
-        index.setCode("000000");
-        index.setName("无效指数代码");
-        return CollectionUtil.toList(index);
+        return CollUtil.toList(new Index("000000", "无效指数代码"));
     }
 
 

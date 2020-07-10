@@ -10,13 +10,9 @@ import lombok.Data;
  */
 @Data
 public class IndexData {
-    /**
-     * 日期
-     */
+    //日期
     private String date;
-    /**
-     * 值
-     */
+    //值
     private float closePoint;
 
     public IndexData(String date, float closePoint) {

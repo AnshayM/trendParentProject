@@ -19,9 +19,6 @@ public class IndexService {
 
     @Cacheable(key = "'all_codes'")
     public List<Index> get() {
-        Index index = new Index();
-        index.setName("无效指数代码");
-        index.setCode("000000");
-        return CollUtil.toList(index);
+        return CollUtil.toList(new Index("000000", "无效指数代码"));
     }
 }

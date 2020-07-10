@@ -1,5 +1,6 @@
 package pers.anshay.contoller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +14,7 @@ import java.util.List;
  * @author anshay
  * @date 2020/6/25
  */
+@Slf4j
 @RestController
 public class IndexController {
     private final IndexService indexService;
@@ -30,7 +32,7 @@ public class IndexController {
     @GetMapping("/codes")
     @CrossOrigin
     public List<Index> codes() {
-        System.out.println("current instance's port is " + ipConfiguration.getPort());
+        log.info("current instance's port is {}", ipConfiguration.getPort());
         return indexService.get();
     }
 }

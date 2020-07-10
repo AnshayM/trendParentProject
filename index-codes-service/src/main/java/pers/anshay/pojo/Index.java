@@ -14,4 +14,12 @@ import java.io.Serializable;
 public class Index implements Serializable {
     String code;
     String name;
+
+    public Index(String code, String name) {
+        this.code = code;
+        this.name = name;
+    }
+
+    public Index() {
+    }
 }

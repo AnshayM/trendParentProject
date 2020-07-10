@@ -14,10 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import pers.anshay.pojo.IndexData;
 import pers.anshay.util.SpringContextUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 指数数据service
@@ -105,9 +102,6 @@ public class IndexDataService {
      */
     public List<IndexData> thirdPartNotConnected(String code) {
         log.info("第三方数据未连接");
-        IndexData index = new IndexData();
-        index.setClosePoint(0);
-        index.setDate("n/a");
-        return CollectionUtil.toList(index);
+        return Collections.singletonList(new IndexData("n/a", 0));
     }
 }
