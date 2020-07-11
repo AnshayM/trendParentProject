@@ -5,3 +5,5 @@ eureka:
 spring:
   application:
     name: index-gather-store-service
+server:
+  port: 8001

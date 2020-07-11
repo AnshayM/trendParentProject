@@ -5,3 +5,5 @@ eureka:
 spring:
   application:
     name: third-part-index-data-project
+server:
+  port: 8090
