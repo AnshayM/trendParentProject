@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 import pers.anshay.pojo.IndexData;
 import pers.anshay.service.BackTestService;
 
@@ -15,7 +16,7 @@ import java.util.Map;
  * @author anshay
  * @date 2020/7/11
  */
-@Controller
+@RestController
 public class BackTestController {
     private final BackTestService backTestService;
 
