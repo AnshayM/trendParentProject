@@ -1,6 +1,7 @@
 package pers.anshay.contoller;
 
-import org.springframework.stereotype.Controller;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,9 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pers.anshay.pojo.IndexData;
 import pers.anshay.service.BackTestService;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author anshay
@@ -24,13 +23,46 @@ public class BackTestController {
         this.backTestService = backTestService;
     }
 
-    @GetMapping("/simulate/{code}")
+    @GetMapping("/simulate/{code}/{startDate}/{endDate}")
     @CrossOrigin
-    public Map<String, Object> backTest(@PathVariable("code") String code) {
-        List<IndexData> indexDatas = backTestService.listIndexData(code);
+    public Map<String, Object> backTest(@PathVariable("code") String code,
+                                        @PathVariable("startDate") String startDate, @PathVariable("endDate") String endDate) {
+        List<IndexData> list = backTestService.listIndexData(code);
+        List<IndexData> resultList = filterByDateRange(list, startDate, endDate);
+        String indexStartDate = resultList.get(0).getDate();
+        String indexEndDate = resultList.get(resultList.size() - 1).getDate();
+
         HashMap<String, Object> map = new HashMap<>();
-        map.put("indexDatas", indexDatas);
+        map.put("indexDatas", resultList);
+        map.put("indexStartDate", indexStartDate);
+        map.put("indexEndDate", indexEndDate);
         return map;
+    }
+
+    /**
+     * 取时间范围内的数据
+     *
+     * @param allIndexData 数据集合
+     * @param strStartDate 结束日期
+     * @param strEndDate   开始时间
+     * @return List<IndexData>
+     */
+    private List<IndexData> filterByDateRange(List<IndexData> allIndexData, String strStartDate, String strEndDate) {
+        if (StrUtil.isBlankOrUndefined(strStartDate) || StrUtil.isBlankOrUndefined(strEndDate)) {
+            return allIndexData;
+        }
+
+        List<IndexData> result = new ArrayList<>();
+        Date startDate = DateUtil.parse(strStartDate);
+        Date endDate = DateUtil.parse(strEndDate);
+
+        for (IndexData indexData : allIndexData) {
+            Date date = DateUtil.parse(indexData.getDate());
+            if (date.getTime() >= startDate.getTime() && date.getTime() <= endDate.getTime()) {
+                result.add(indexData);
+            }
+        }
+        return result;
     }
 
 }
