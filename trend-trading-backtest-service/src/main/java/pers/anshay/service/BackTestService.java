@@ -27,20 +27,31 @@ public class BackTestService {
     public List<IndexData> listIndexData(String code) {
         List<IndexData> result = indexDataClient.getIndexData(code);
         Collections.reverse(result);
+
         return result;
     }
 
     public Map<String, Object> simulate(int ma, float sellRate, float buyRate, float serviceCharge, List<IndexData> indexDatas) {
+
         List<Profit> profits = new ArrayList<>();
         List<Trade> trades = new ArrayList<>();
+
         float initCash = 1000;
         float cash = initCash;
         float share = 0;
         float value = 0;
+
+        int winCount = 0;
+        float totalWinRate = 0;
+        float avgWinRate = 0;
+        float totalLossRate = 0;
+        int lossCount = 0;
+        float avgLossRate = 0;
+
         float init = 0;
-        if (!indexDatas.isEmpty()) {
+        if (!indexDatas.isEmpty())
             init = indexDatas.get(0).getClosePoint();
-        }
+
         for (int i = 0; i < indexDatas.size(); i++) {
             IndexData indexData = indexDatas.get(i);
             float closePoint = indexData.getClosePoint();
@@ -76,8 +87,17 @@ public class BackTestService {
                         Trade trade = trades.get(trades.size() - 1);
                         trade.setSellDate(indexData.getDate());
                         trade.setSellClosePoint(indexData.getClosePoint());
+
                         float rate = cash / initCash;
                         trade.setRate(rate);
+
+                        if (trade.getSellClosePoint() - trade.getBuyClosePoint() > 0) {
+                            totalWinRate += (trade.getSellClosePoint() - trade.getBuyClosePoint()) / trade.getBuyClosePoint();
+                            winCount++;
+                        } else {
+                            totalLossRate += (trade.getSellClosePoint() - trade.getBuyClosePoint()) / trade.getBuyClosePoint();
+                            lossCount++;
+                        }
                     }
                 }
                 //do nothing
@@ -100,9 +120,19 @@ public class BackTestService {
             profits.add(profit);
 
         }
+
+        avgWinRate = totalWinRate / winCount;
+        avgLossRate = totalLossRate / lossCount;
+
         Map<String, Object> map = new HashMap<>();
         map.put("profits", profits);
         map.put("trades", trades);
+
+        map.put("winCount", winCount);
+        map.put("lossCount", lossCount);
+        map.put("avgWinRate", avgWinRate);
+        map.put("avgLossRate", avgLossRate);
+
         return map;
     }
 
@@ -142,15 +172,16 @@ public class BackTestService {
         return avg;
     }
 
-
     public float getYear(List<IndexData> allIndexDatas) {
         float years;
         String sDateStart = allIndexDatas.get(0).getDate();
-        String sDateEnd = allIndexDatas.get(allIndexDatas.size()-1).getDate();
+        String sDateEnd = allIndexDatas.get(allIndexDatas.size() - 1).getDate();
+
         Date dateStart = DateUtil.parse(sDateStart);
         Date dateEnd = DateUtil.parse(sDateEnd);
+
         long days = DateUtil.between(dateStart, dateEnd, DateUnit.DAY);
-        years = days/365f;
+        years = days / 365f;
         return years;
     }
 }
