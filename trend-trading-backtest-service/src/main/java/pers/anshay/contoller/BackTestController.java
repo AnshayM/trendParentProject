@@ -27,47 +27,52 @@ public class BackTestController {
 
     @GetMapping("/simulate/{code}/{startDate}/{endDate}")
     @CrossOrigin
-    public Map<String, Object> backTest(@PathVariable("code") String code, @PathVariable("startDate") String startDate, @PathVariable("endDate") String endDate) {
-        List<IndexData> list = backTestService.listIndexData(code);
-        List<IndexData> resultList = filterByDateRange(list, startDate, endDate);
+    public Map<String, Object> backTest(@PathVariable("code") String code, @PathVariable("startDate") String strStartDate, @PathVariable("endDate") String strEndDate) {
+        List<IndexData> allIndexDatas = backTestService.listIndexData(code);
+
+        String indexStartDate = allIndexDatas.get(0).getDate();
+        String indexEndDate = allIndexDatas.get(allIndexDatas.size() - 1).getDate();
+
+        allIndexDatas = filterByDateRange(allIndexDatas, strStartDate, strEndDate);
+
         int ma = 20;
         float sellRate = 0.95f;
         float buyRate = 1.05f;
         float serviceCharge = 0f;
-        Map<String,?> simulateResult= backTestService.simulate(ma,sellRate, buyRate,serviceCharge, resultList);
+        Map<String, ?> simulateResult = backTestService.simulate(ma, sellRate, buyRate, serviceCharge, allIndexDatas);
         List<Profit> profits = (List<Profit>) simulateResult.get("profits");
         List<Trade> trades = (List<Trade>) simulateResult.get("trades");
 
-        String indexStartDate = resultList.get(0).getDate();
-        String indexEndDate = resultList.get(resultList.size() - 1).getDate();
+        float years = backTestService.getYear(allIndexDatas);
+        float indexIncomeTotal = (allIndexDatas.get(allIndexDatas.size() - 1).getClosePoint() - allIndexDatas.get(0).getClosePoint()) / allIndexDatas.get(0).getClosePoint();
+        float indexIncomeAnnual = (float) Math.pow(1 + indexIncomeTotal, 1 / years) - 1;
+        float trendIncomeTotal = (profits.get(profits.size() - 1).getValue() - profits.get(0).getValue()) / profits.get(0).getValue();
+        float trendIncomeAnnual = (float) Math.pow(1 + trendIncomeTotal, 1 / years) - 1;
 
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("indexDatas", resultList);
-        map.put("profits", profits);
-        map.put("trades", trades);
-        map.put("indexStartDate", indexStartDate);
-        map.put("indexEndDate", indexEndDate);
-        return map;
+        Map<String, Object> result = new HashMap<>();
+        result.put("indexDatas", allIndexDatas);
+        result.put("indexStartDate", indexStartDate);
+        result.put("indexEndDate", indexEndDate);
+        result.put("profits", profits);
+        result.put("trades", trades);
+        result.put("years", years);
+        result.put("indexIncomeTotal", indexIncomeTotal);
+        result.put("indexIncomeAnnual", indexIncomeAnnual);
+        result.put("trendIncomeTotal", trendIncomeTotal);
+        result.put("trendIncomeAnnual", trendIncomeAnnual);
+
+        return result;
     }
 
-    /**
-     * 取时间范围内的数据
-     *
-     * @param allIndexData 数据集合
-     * @param strStartDate 结束日期
-     * @param strEndDate   开始时间
-     * @return List<IndexData>
-     */
-    private List<IndexData> filterByDateRange(List<IndexData> allIndexData, String strStartDate, String strEndDate) {
-        if (StrUtil.isBlankOrUndefined(strStartDate) || StrUtil.isBlankOrUndefined(strEndDate)) {
-            return allIndexData;
-        }
+    private List<IndexData> filterByDateRange(List<IndexData> allIndexDatas, String strStartDate, String strEndDate) {
+        if (StrUtil.isBlankOrUndefined(strStartDate) || StrUtil.isBlankOrUndefined(strEndDate))
+            return allIndexDatas;
 
         List<IndexData> result = new ArrayList<>();
         Date startDate = DateUtil.parse(strStartDate);
         Date endDate = DateUtil.parse(strEndDate);
 
-        for (IndexData indexData : allIndexData) {
+        for (IndexData indexData : allIndexDatas) {
             Date date = DateUtil.parse(indexData.getDate());
             if (date.getTime() >= startDate.getTime() && date.getTime() <= endDate.getTime()) {
                 result.add(indexData);
