@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import pers.anshay.pojo.AnnualProfit;
 import pers.anshay.pojo.IndexData;
 import pers.anshay.pojo.Profit;
 import pers.anshay.pojo.Trade;
@@ -57,6 +58,8 @@ public class BackTestController {
         float avgWinRate = (Float) simulateResult.get("avgWinRate");
         float avgLossRate = (Float) simulateResult.get("avgLossRate");
 
+        List<AnnualProfit> annualProfits = (List<AnnualProfit>) simulateResult.get("annualProfits");
+
         Map<String, Object> result = new HashMap<>();
         result.put("indexDatas", allIndexDatas);
         result.put("indexStartDate", indexStartDate);
@@ -74,6 +77,8 @@ public class BackTestController {
         result.put("avgWinRate", avgWinRate);
         result.put("avgLossRate", avgLossRate);
 
+        result.put("annualProfits", annualProfits);
+
         return result;
     }
 
@@ -87,11 +92,13 @@ public class BackTestController {
 
         for (IndexData indexData : allIndexDatas) {
             Date date = DateUtil.parse(indexData.getDate());
-            if (date.getTime() >= startDate.getTime() && date.getTime() <= endDate.getTime()) {
+            if (
+                    date.getTime() >= startDate.getTime() &&
+                            date.getTime() <= endDate.getTime()
+            ) {
                 result.add(indexData);
             }
         }
         return result;
     }
-
 }
