@@ -26,16 +26,16 @@ public class BackTestController {
         this.backTestService = backTestService;
     }
 
-    @GetMapping("/simulate/{code}/{ma}/{buyThreshold}/{sellThreshold}/{startDate}/{endDate}")
+    @GetMapping("/simulate/{code}/{ma}/{buyThreshold}/{sellThreshold}/{serviceCharge}/{startDate}/{endDate}")
     @CrossOrigin
     public Map<String, Object> backTest(
             @PathVariable("code") String code
             , @PathVariable("ma") int ma
             , @PathVariable("buyThreshold") float buyThreshold
             , @PathVariable("sellThreshold") float sellThreshold
+            , @PathVariable("serviceCharge") float serviceCharge
             , @PathVariable("startDate") String strStartDate
-            , @PathVariable("endDate") String strEndDate
-    ) {
+            , @PathVariable("endDate") String strEndDate) {
         List<IndexData> allIndexDatas = backTestService.listIndexData(code);
 
         String indexStartDate = allIndexDatas.get(0).getDate();
@@ -45,7 +45,6 @@ public class BackTestController {
 
         float sellRate = sellThreshold;
         float buyRate = buyThreshold;
-        float serviceCharge = 0f;
         Map<String, ?> simulateResult = backTestService.simulate(ma, sellRate, buyRate, serviceCharge, allIndexDatas);
         List<Profit> profits = (List<Profit>) simulateResult.get("profits");
         List<Trade> trades = (List<Trade>) simulateResult.get("trades");
